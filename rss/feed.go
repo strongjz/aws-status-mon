@@ -1,6 +1,7 @@
 package rss
 
 import (
+	"fmt"
 	"golang.org/x/net/html"
 	"io/ioutil"
 	"log"
@@ -8,16 +9,24 @@ import (
 	"strings"
 )
 
+var BASEUrl = "https://status.aws.amazon.com/rss"
+
 type Feed struct {
 	Region  string
 	Service string
+	URL     string
 	PollInt int
+}
+
+func PrintFeed(f *Feed) string {
+	return fmt.Sprintf("Service - %s : Region %s : URL %s : Poll Interval %d", f.Service, f.Region, f.URL, f.PollInt)
 }
 
 func NewFeed() *Feed {
 	returnFeed := &Feed{}
 	returnFeed.Region = "us-east-1"
 	returnFeed.Service = "elasticcloudcompute"
+	returnFeed.URL = fmt.Sprintf("https://status.aws.amazon.com/rss/%s-%s.rss", returnFeed.Service, returnFeed.Region)
 	returnFeed.PollInt = 60
 	return returnFeed
 }
@@ -80,9 +89,14 @@ func parseFeed(f string) *Feed {
 
 	returnFeed.Service = f[5:sep1]
 	returnFeed.Region = f[sep1+1 : len(f)-4]
+	returnFeed.URL = fmt.Sprintf("%s/%s-%s.rss", BASEUrl, returnFeed.Service, returnFeed.Region)
 	returnFeed.PollInt = 60
 
 	log.Printf("Service - %s : Region %s", returnFeed.Service, returnFeed.Region)
 
 	return returnFeed
+}
+
+func PollFeed(f Feed) {
+
 }

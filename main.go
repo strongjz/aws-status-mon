@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/strongjz/aws-status-mon/rss"
 	"log"
 	"math/rand"
@@ -21,6 +22,6 @@ func main() {
 	random := rand.New(source)
 	i := random.Intn(len(rssFeed))
 
-	log.Printf("Random Feed Region - %s , Service - %s\n", rssFeed[i].Region, rssFeed[i].Service)
+	fmt.Printf("Random Feed %s\n", rss.PrintFeed(rssFeed[i]))
 
 }
