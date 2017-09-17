@@ -32,14 +32,14 @@ func PollFeed(f []*Feed) {
 
 		go poll(f[i])
 
-		for diff := range goroutineDelta {
-			numGoroutines += diff
-			if numGoroutines == 0 {
-				log.Printf("Polling Finished")
-				os.Exit(0)
-			}
-		}
+	}
 
+	for diff := range goroutineDelta {
+		numGoroutines += diff
+		if numGoroutines == 0 {
+			log.Printf("Polling Finished")
+			os.Exit(0)
+		}
 	}
 }
 
@@ -53,10 +53,7 @@ func poll(f *Feed) {
 
 		findError(feed, f.Service, f.Region)
 
-		//log.Printf("All good in the hood")
 		time.Sleep(10 * time.Second)
-
-		//goroutineDelta <- +1
 
 	}
 
@@ -70,8 +67,6 @@ func findError(parsedFeed *gofeed.Feed, service, region string) {
 	if len(parsedFeed.Items) > 0 {
 		for _, i := range parsedFeed.Items {
 			if strings.Contains(i.Title, "Increased Error Rates") {
-				//			nothing = true
-				//			whatsup = i.Description
 
 				alert.StandardOut(service, region, i.Description)
 
