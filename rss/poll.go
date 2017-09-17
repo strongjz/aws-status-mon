@@ -12,13 +12,16 @@ import (
 
 var goroutineDelta = make(chan int)
 
-func init() {
-	var ErrorMessages []string
+//ErrorMessages - List of strings to indicate an error in the rss
+var errorMessages []string
 
-	ErrorMessages = append(ErrorMessages, "Increased Error Rates")
-	ErrorMessages = append(ErrorMessages, "Intermittent API Latency")
+func init() {
+
+	errorMessages = append(errorMessages, "Increased Error Rates")
+	errorMessages = append(errorMessages, "Intermittent API Latency")
 }
 
+//PollFeed - Starts polling the list of feed sent
 func PollFeed(f []*Feed) {
 
 	log.Printf("Starting Polling")
@@ -61,26 +64,30 @@ func poll(f *Feed) {
 
 func findError(parsedFeed *gofeed.Feed, service, region string) {
 
-	//nothing := false
-	//whatsup := "nothing"
-
 	if len(parsedFeed.Items) > 0 {
 		for _, i := range parsedFeed.Items {
-			if strings.Contains(i.Title, "Increased Error Rates") {
-
+			if statusCheck(i.Title) {
 				alert.StandardOut(service, region, i.Description)
-
 			}
 		}
 	} else {
-		if strings.Contains(parsedFeed.Title, "Increased Error Rates") {
-			//		nothing = true
-			//		whatsup = parsedFeed.Description
-
+		if statusCheck(parsedFeed.Title) {
 			alert.StandardOut(service, region, parsedFeed.Description)
 		}
 	}
 
 	log.Printf("All good in Service %s - Region %s", service, region)
-	return //whatsup, nothing
+	return
+}
+
+func statusCheck(t string) bool {
+
+	for _, s := range errorMessages {
+		if strings.Contains(t, s) {
+			return true
+
+		}
+	}
+
+	return false
 }
