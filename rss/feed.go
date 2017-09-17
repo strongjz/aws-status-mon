@@ -57,6 +57,13 @@ func GetFeed() ([]*Feed, error) {
 		return nil, err
 	}
 
+	feedList := parseHTML(doc)
+
+	return feedList, nil
+}
+
+func parseHTML(doc *html.Node) []*Feed {
+
 	var feedList []*Feed
 
 	var f func(*html.Node)
@@ -79,7 +86,7 @@ func GetFeed() ([]*Feed, error) {
 	}
 	f(doc)
 
-	return feedList, nil
+	return feedList
 }
 
 func parseFeed(f string) *Feed {

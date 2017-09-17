@@ -30,11 +30,8 @@ func PollFeed(f []*Feed) {
 	numGoroutines := len(f)
 
 	for i := 0; i < 10; i++ {
-
 		log.Printf("Polling Starting %s-%s", f[i].Service, f[i].Region)
-
 		go poll(f[i])
-
 	}
 
 	for diff := range goroutineDelta {
