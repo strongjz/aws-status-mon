@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/strongjz/aws-status-mon/rss"
 	"log"
-)
+	)
 
 func main() {
 
