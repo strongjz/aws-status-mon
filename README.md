@@ -1,4 +1,7 @@
 # aws-status-mon
-Gathers RSS feeds AWS status pages and monitor and alerts on AWS outages 
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/strongjz/aws-status-mon)](https://goreportcard.com/report/github.com/strongjz/aws-status-mon)
+
+Gathers RSS feeds AWS status pages and monitor and alerts on AWS outages
 
 
