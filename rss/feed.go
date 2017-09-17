@@ -16,6 +16,7 @@ type Feed struct {
 	Service string
 	URL     string
 	PollInt int
+	Alert   bool
 }
 
 func PrintFeed(f *Feed) string {
@@ -28,6 +29,7 @@ func NewFeed() *Feed {
 	returnFeed.Service = "elasticcloudcompute"
 	returnFeed.URL = fmt.Sprintf("https://status.aws.amazon.com/rss/%s-%s.rss", returnFeed.Service, returnFeed.Region)
 	returnFeed.PollInt = 60
+	returnFeed.Alert = false
 	return returnFeed
 }
 
@@ -92,11 +94,7 @@ func parseFeed(f string) *Feed {
 	returnFeed.URL = fmt.Sprintf("%s/%s-%s.rss", BASEUrl, returnFeed.Service, returnFeed.Region)
 	returnFeed.PollInt = 60
 
-	log.Printf("Service - %s : Region %s", returnFeed.Service, returnFeed.Region)
+	//log.Printf("Service - %s : Region %s", returnFeed.Service, returnFeed.Region)
 
 	return returnFeed
-}
-
-func PollFeed(f Feed) {
-
 }

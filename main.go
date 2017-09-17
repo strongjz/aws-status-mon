@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"github.com/strongjz/aws-status-mon/rss"
-	"log"
+	//	"log"
 	"math/rand"
+	//"time"
+	"log"
 	"time"
 )
 
@@ -20,8 +21,21 @@ func main() {
 
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
-	i := random.Intn(len(rssFeed))
+	inum := random.Intn(len(rssFeed))
 
-	fmt.Printf("Random Feed %s\n", rss.PrintFeed(rssFeed[i]))
+	log.Printf("Random Feed %s\n", rss.PrintFeed(rssFeed[inum]))
 
+	/*
+		newFeed := rss.NewFeed()
+
+		newFeed.Service = "sqs"
+		newFeed.Region = "us-east-1"
+		newFeed.PollInt = 60
+		newFeed.URL = "https://status.aws.amazon.com/rss/sqs-us-east-1.rss"
+		//test polling one feed
+	*/
+
+	for _, i := range rssFeed {
+		go rss.PollFeed(i)
+	}
 }
