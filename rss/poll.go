@@ -24,14 +24,14 @@ func init() {
 //PollFeed - Starts polling the list of feed sent
 func PollFeed(f []*Feed) {
 
-	log.Printf("Starting Polling")
-	log.Printf("Polling %d Services", len(f))
+	//log.Printf("Starting Polling")
+	//log.Printf("Polling %d Services", len(f))
 
 	numGoroutines := len(f)
 
-	for i := 0; i < 10; i++ {
-		log.Printf("Polling Starting %s-%s", f[i].Service, f[i].Region)
-		go poll(f[i])
+	for _, i := range f {
+		log.Printf("[INF0] Polling Starting %s-%s", i.Service, i.Region)
+		go poll(i)
 	}
 
 	for diff := range goroutineDelta {
@@ -45,7 +45,7 @@ func PollFeed(f []*Feed) {
 
 func poll(f *Feed) {
 
-	log.Printf("Polling %s in %s", f.Service, f.Region)
+	log.Printf("[INF0] Polling %s in %s", f.Service, f.Region)
 
 	for {
 		fp := gofeed.NewParser()
@@ -53,7 +53,7 @@ func poll(f *Feed) {
 
 		findError(feed, f.Service, f.Region)
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(time.Duration(f.PollInt) * time.Minute)
 
 	}
 
@@ -64,23 +64,26 @@ func findError(parsedFeed *gofeed.Feed, service, region string) {
 	if len(parsedFeed.Items) > 0 {
 		for _, i := range parsedFeed.Items {
 			if statusCheck(i.Title) {
+
+				//log.Printf("\nTitle: %s \n Description: %s\n", i.Title, i.Description)
 				alert.StandardOut(service, region, i.Description)
 			}
 		}
 	} else {
 		if statusCheck(parsedFeed.Title) {
+			//log.Printf("Title: %s \n Description: %s\n", parsedFeed.Title, parsedFeed.Description)
 			alert.StandardOut(service, region, parsedFeed.Description)
 		}
 	}
 
-	log.Printf("All good in Service %s - Region %s", service, region)
+	log.Printf("[INF0] All good in Service %s - Region %s", service, region)
 	return
 }
 
 func statusCheck(t string) bool {
 
 	for _, s := range errorMessages {
-		if strings.Contains(t, s) {
+		if strings.Contains(t, s) && !strings.Contains(t, "RESOLVED") {
 			return true
 
 		}

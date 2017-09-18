@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/strongjz/aws-status-mon/rss"
 	"log"
-	)
+)
 
 func main() {
 
@@ -12,7 +12,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Number of Feeds %d\n", len(rssFeed))
+	log.Printf("[INF0] Number of Feeds %d\n", len(rssFeed))
 
 	rss.PollFeed(rssFeed)
 
