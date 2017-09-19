@@ -7,13 +7,15 @@ import (
 
 func main() {
 
-	rssFeed, err := rss.GetFeed()
+	r := rss.NewRss()
+
+	err := r.GetFeed()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Printf("[INF0] Number of Feeds %d\n", len(rssFeed))
+	log.Printf("[INF0] Number of Feeds %d\n", len(r.Feed))
 
-	rss.PollFeed(rssFeed)
+	r.PollFeed()
 
 }

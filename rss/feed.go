@@ -2,6 +2,7 @@ package rss
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"golang.org/x/net/html"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,12 @@ import (
 
 //BASEUrl - Base url to grab the AWS status page
 var BASEUrl = "https://status.aws.amazon.com"
+
+//Rss - Holds the config for the RSS and slice of Feeds
+type Rss struct {
+	Config *viper.Viper
+	Feed   []*Feed
+}
 
 //Feed - Struct to contain the feed data for individual services
 type Feed struct {
@@ -26,6 +33,22 @@ func PrintFeed(f *Feed) string {
 	return fmt.Sprintf("Service - %s : Region %s : URL %s : Poll Interval %d", f.Service, f.Region, f.URL, f.PollInt)
 }
 
+func NewRss() *Rss {
+
+	r := Rss{}
+	var f []*Feed
+
+	config, err := newConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r.Config = config
+	r.Feed = f
+
+	return &r
+}
+
 //NewFeed - Feed constructor
 func NewFeed() *Feed {
 	returnFeed := &Feed{}
@@ -38,28 +61,31 @@ func NewFeed() *Feed {
 }
 
 //GetFeed - grabs all the RSS feeds from the status page
-func GetFeed() ([]*Feed, error) {
+func (r *Rss) GetFeed() error {
+
 	// request and parse the front page
 	resp, err := http.Get(BASEUrl)
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return err
 	}
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return err
 	}
 
 	doc, err := html.Parse(strings.NewReader(string(b)))
 	if err != nil {
 		log.Fatal(err)
-		return nil, err
+		return err
 	}
 
 	feedList := parseHTML(doc)
 
-	return feedList, nil
+	r.Feed = feedList
+
+	return nil
 }
 
 func parseHTML(doc *html.Node) []*Feed {

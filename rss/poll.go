@@ -22,14 +22,14 @@ func init() {
 }
 
 //PollFeed - Starts polling the list of feed sent
-func PollFeed(f []*Feed) {
+func (r *Rss) PollFeed() {
 
 	//log.Printf("Starting Polling")
 	//log.Printf("Polling %d Services", len(f))
 
-	numGoroutines := len(f)
+	numGoroutines := len(r.Feed)
 
-	for _, i := range f {
+	for _, i := range r.Feed {
 		log.Printf("[INF0] Polling Starting %s-%s", i.Service, i.Region)
 		go poll(i)
 	}
