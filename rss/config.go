@@ -7,7 +7,6 @@ import (
 	"log"
 )
 
-//
 func newConfig() (*viper.Viper, error) {
 
 	configName := fmt.Sprint("config/config.yml")
@@ -18,7 +17,7 @@ func newConfig() (*viper.Viper, error) {
 	c.WatchConfig()
 
 	c.OnConfigChange(func(e fsnotify.Event) {
-		log.Printf("Config file changed:", e.Name)
+		log.Printf("Config file changed: %s", e.Name)
 	})
 
 	err := c.ReadInConfig() // Find and read the config file
