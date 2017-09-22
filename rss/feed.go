@@ -81,14 +81,14 @@ func (r *Rss) GetFeed() error {
 		return err
 	}
 
-	feedList := parseHTML(doc)
+	feedList := r.parseHTML(doc)
 
 	r.Feed = feedList
 
 	return nil
 }
 
-func parseHTML(doc *html.Node) []*Feed {
+func (r *Rss) parseHTML(doc *html.Node) []*Feed {
 
 	var feedList []*Feed
 
@@ -98,7 +98,7 @@ func parseHTML(doc *html.Node) []*Feed {
 			for _, a := range n.Attr {
 				if a.Key == "href" && strings.Contains(a.Val, "rss") {
 
-					parsed := parseFeed(a.Val)
+					parsed := r.parseFeed(a.Val)
 					if parsed != nil {
 						feedList = append(feedList, parsed)
 					}
@@ -115,7 +115,7 @@ func parseHTML(doc *html.Node) []*Feed {
 	return feedList
 }
 
-func parseFeed(f string) *Feed {
+func (r *Rss) parseFeed(f string) *Feed {
 	//AWS Service feed url are /rss/SERVICE-REGION.rss
 	returnFeed := &Feed{}
 

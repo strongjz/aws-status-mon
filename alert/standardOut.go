@@ -3,8 +3,8 @@ package alert
 import "log"
 
 //StandardOut - Logging the alert to Standard out
-func StandardOut(service string, region string, whatsup string) {
+func standardOut(service string, region string, whatsup string) {
 
-	log.Printf("[ALERT] %s in %s %s\n", service, region, whatsup)
+	log.Printf("[ALERT][LOG] %s in %s %s\n", service, region, whatsup)
 
 }

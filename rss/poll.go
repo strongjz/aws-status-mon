@@ -31,7 +31,7 @@ func (r *Rss) PollFeed() {
 
 	for _, i := range r.Feed {
 		log.Printf("[INF0] Polling Starting %s-%s", i.Service, i.Region)
-		go poll(i)
+		go r.poll(i)
 	}
 
 	for diff := range goroutineDelta {
@@ -43,7 +43,7 @@ func (r *Rss) PollFeed() {
 	}
 }
 
-func poll(f *Feed) {
+func (r *Rss) poll(f *Feed) {
 
 	log.Printf("[INF0] Polling %s in %s", f.Service, f.Region)
 
@@ -51,7 +51,7 @@ func poll(f *Feed) {
 		fp := gofeed.NewParser()
 		feed, _ := fp.ParseURL(f.URL)
 
-		findError(feed, f.Service, f.Region)
+		r.findError(feed, f.Service, f.Region)
 
 		time.Sleep(time.Duration(f.PollInt) * time.Minute)
 
@@ -59,20 +59,25 @@ func poll(f *Feed) {
 
 }
 
-func findError(parsedFeed *gofeed.Feed, service, region string) {
+func (r *Rss) findError(parsedFeed *gofeed.Feed, service, region string) {
+
+	//var shouldAlert bool
+	//var message string
 
 	if len(parsedFeed.Items) > 0 {
 		for _, i := range parsedFeed.Items {
-			if statusCheck(i.Title) {
+			if r.statusCheck(i.Title) {
 
 				//log.Printf("\nTitle: %s \n Description: %s\n", i.Title, i.Description)
-				alert.StandardOut(service, region, i.Description)
+				alert.Alert(r.Config, service, region, i.Description)
+
 			}
 		}
 	} else {
-		if statusCheck(parsedFeed.Title) {
+		if r.statusCheck(parsedFeed.Title) {
 			//log.Printf("Title: %s \n Description: %s\n", parsedFeed.Title, parsedFeed.Description)
-			alert.StandardOut(service, region, parsedFeed.Description)
+			alert.Alert(r.Config, service, region, parsedFeed.Description)
+
 		}
 	}
 
@@ -80,14 +85,18 @@ func findError(parsedFeed *gofeed.Feed, service, region string) {
 	return
 }
 
-func statusCheck(t string) bool {
+func (r *Rss) statusCheck(t string) bool {
 
 	for _, s := range errorMessages {
 		if strings.Contains(t, s) && !strings.Contains(t, "RESOLVED") {
 			return true
-
 		}
 	}
 
 	return false
+}
+
+//todayDate - returns true if d is today's today
+func todayDate(d string) bool {
+	return true
 }

@@ -17,5 +17,4 @@ func main() {
 	log.Printf("[INF0] Number of Feeds %d\n", len(r.Feed))
 
 	r.PollFeed()
-
 }
