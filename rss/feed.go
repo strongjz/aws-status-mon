@@ -6,9 +6,16 @@ import (
 	"golang.org/x/net/html"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
+	//"time"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
+}
 
 //BASEUrl - Base url to grab the AWS status page
 var BASEUrl = "https://status.aws.amazon.com"
@@ -131,7 +138,6 @@ func (r *Rss) parseFeed(f string) *Feed {
 	returnFeed.Region = f[sep1+1 : len(f)-4]
 	returnFeed.URL = fmt.Sprintf("%s/rss/%s-%s.rss", BASEUrl, returnFeed.Service, returnFeed.Region)
 	returnFeed.PollInt = 60
-
 	//log.Printf("Service - %s : Region %s", returnFeed.Service, returnFeed.Region)
 
 	return returnFeed

@@ -7,6 +7,7 @@ import (
 	"github.com/strongjz/aws-status-mon/alert"
 	"os"
 	"strings"
+
 	"time"
 )
 
@@ -32,6 +33,7 @@ func (r *Rss) PollFeed() {
 	for _, i := range r.Feed {
 		log.Printf("[INF0] Polling Starting %s-%s", i.Service, i.Region)
 		go r.poll(i)
+		time.Sleep(time.Nanosecond)
 	}
 
 	for diff := range goroutineDelta {
@@ -66,16 +68,16 @@ func (r *Rss) findError(parsedFeed *gofeed.Feed, service, region string) {
 
 	if len(parsedFeed.Items) > 0 {
 		for _, i := range parsedFeed.Items {
-			if r.statusCheck(i.Title) {
+			if r.statusCheck(service, region, i.Title, i.Published) {
 
-				//log.Printf("\nTitle: %s \n Description: %s\n", i.Title, i.Description)
+				log.Printf("[DEBUG][ALERT] %s-%s \n Title: %s \n Description: %s\n Pub Date: %s\n", service, region, i.Title, i.Description, i.Published)
 				alert.Alert(r.Config, service, region, i.Description)
 
 			}
 		}
 	} else {
-		if r.statusCheck(parsedFeed.Title) {
-			//log.Printf("Title: %s \n Description: %s\n", parsedFeed.Title, parsedFeed.Description)
+		if r.statusCheck(service, region, parsedFeed.Title, parsedFeed.Published) {
+			log.Printf("[DEBUG][ALERT] %s-%s  \n Title: %s \n Description: %s\n Pub Date: %s\n", service, region, parsedFeed.Title, parsedFeed.Description, parsedFeed.Published)
 			alert.Alert(r.Config, service, region, parsedFeed.Description)
 
 		}
@@ -85,18 +87,52 @@ func (r *Rss) findError(parsedFeed *gofeed.Feed, service, region string) {
 	return
 }
 
-func (r *Rss) statusCheck(t string) bool {
+func (r *Rss) statusCheck(service, region, title, time string) bool {
 
-	for _, s := range errorMessages {
-		if strings.Contains(t, s) && !strings.Contains(t, "RESOLVED") {
-			return true
+	log.Printf("[DEBUG][STATUS CHECK] %s-%s: Title: %s Time: %s", service, region, title, time)
+
+	status := false
+	runErrorMsg := true //assume you need to check error messages
+
+	if strings.Contains(strings.ToLower(title), "resolved") && todayDate(service, region, time) {
+		runErrorMsg = false //no need to check error Messages, already resolved or didn't happen today
+	}
+
+	if runErrorMsg {
+		for _, s := range errorMessages {
+			if strings.Contains(title, s) {
+				status = true
+			}
 		}
 	}
 
-	return false
+	log.Printf("[DEBUG][STATUS CHECK] %s-%s: Returning Status Check: %v", service, region, status)
+
+	return status
 }
 
 //todayDate - returns true if d is today's today
-func todayDate(d string) bool {
-	return true
+func todayDate(service, region, d string) bool {
+
+	log.Printf("[DEBUG][TODAY DATE] %s-%s: Time: %s", service, region, d)
+
+	//pubdate cames in as <pubDate>Thu, 22 Jun 2017 23:59:43 PDT</pubDate>
+
+	now := time.Now()
+
+	//sep := strings.Index(d, ",")
+	//d2 := d[sep+1:]
+	const awsForm = "Thu,  2 Jun 2017 23:59:43 PDT"
+	compare, err := time.Parse(awsForm, d)
+	if err != nil {
+		log.Printf("[ERROR][TODAYS DATE] %s-%s: Parsing time Item: %s", service, region, err)
+		return false
+	}
+
+	//todays day and year, this is an error message we should alert on
+	if (now.Day() == compare.Day()) && (now.Year() == compare.Year()) {
+		return true
+	}
+
+	return false
 }

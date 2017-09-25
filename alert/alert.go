@@ -12,7 +12,6 @@ func Alert(config *viper.Viper, service string, region string, whatsup string) {
 	alerts_enabled := config.GetStringSlice("enabled_alerts")
 
 	for _, a := range alerts_enabled {
-		log.Printf("Alert Enabled %s", a)
 		switch {
 		case a == "sns":
 
